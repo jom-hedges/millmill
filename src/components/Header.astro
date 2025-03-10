@@ -39,7 +39,8 @@ import { Icon } from 'astro-icon/components'
 	nav {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		justify-content: center;
+    gap: 2rem;
 	}
 	nav a {
 		padding: 1em 0.5em;
@@ -51,9 +52,18 @@ import { Icon } from 'astro-icon/components'
 		text-decoration: none;
 		border-bottom-color: var(--accent);
 	}
+
+  .internal-links{
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-grow: 1;
+  }
+
 	.social-links,
 	.social-links a {
 		display: flex;
+    justify-content: flex-end;
     
 	}
 	@media (max-width: 720px) {
