@@ -25,5 +25,58 @@ class WebGL {
     window.addEventListener('resize', this.handleResize)
   }
 
-  
+  private handleResize = () => {
+    this.resizeCallback && this.resizeCallback()
+
+    const { width, height, aspect } = this.size
+    this.camera.aspect = aspect
+    this.camera.updateProjectionMatrix()
+    this.renderer.setSize(width, height)
+  }
+
+  get size() {
+    const { innerWidth: width, innerHeight: height } = window
+    return { width, height, aspect: width / height }      
+  }
+
+  setup(container: HTMLElement) {
+    container.appendChild(this.renderer.domElement)
+  }
+
+  setStats(container: HTMLElement) {
+    this.stats = new Stats()
+    container.appendChild(this.stats.dom)
+  }
+
+  setResizeCallback(callback: () => void) {
+    this.resizeCallback = callback
+  }  
+
+  getMesh<T extends, THREE.Material> (name: string) {
+    return this.scene.getObjectByName(name) as THREE.Mesh<THREE.BufferGeometry, T>   
+  }
+
+  render() {
+    this.renderer.render(this.scene, this.camera)
+  }
+
+  requestAnimationFrame(callback: () => void) {
+    gl.renderer.setAnimationLoop(() => {
+      this.time.delta = this.clock.getDelta()
+      this.time.elapsed = this.clock.getElapsedTime()
+      this.stats?.update()
+      callback()
+    })
+  }
+
+  cancelAnimationFrame() {
+    gl.renderer.setAnimationLoop(null)
+  }
+
+  dispose() {
+    this.cancelAnimationFrame()
+    gl.scene?.clear()
+  }
 }
+
+export const gl = new WebGL()
