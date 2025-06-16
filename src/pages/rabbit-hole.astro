@@ -1,53 +1,54 @@
 ---
-
+import { Icon } from 'astro-icon/components';
 ---
 <body>
-    <div class="wrapper">
-        <!-- Primary Layout -->
-        <!-- DOT GRID -->
-        <div class="instructions">
-            <h1>Rabbit Hole</h1>
-            <p>Click the a shape, then drag to any second shape. Repeat</p>
-            <p>
-                <span class="icons">
-                    <i class="mdi-pine-tree"></i>    
-                </span> = nouns 
-                <br>
-                <span class="icons">
-                    <i class="mdi-play"></i>    
-                </span> = verbs 
-                <br>
-                <span class="icons">
-                    <i class="mdi-star"></i>    
-                </span> = adjectives 
-                <br>
-                Each connection opens new paths, leading you further into the rabbit hole.
-            </p>
-        </div>
-        <div class="game-container">
-            <div class="game">
-                <div class="dot-grid">
-                    <!-- Dots will be generated here -->
-                </div>
-                <div class="shape-container">
-                    <!-- Shapes will be generated here -->
-                </div>
-            </div>
-        </div>
-        <! -- Text Layer -->
-        <div class="text-layer">
-            <h1>Iterate to navigate</h1>
-        </div>
-            <p class="story">
-                <span class="highlight">Rabbit Hole</span> is a game about exploring the unknown, where each choice leads you deeper into a maze of possibilities. 
-                <br>
-                <span class="highlight">Click</span> on a shape to start your journey, and <span class="highlight">drag</span> to connect with another shape. 
-                <br>
-                Each connection opens new paths, leading you further into the rabbit hole.
-                <!-- Text will generate here with JavaScript -->
-            </p>
-        </div>
+  <div class="quadrant-grid">
+    <!-- Top Left: Icon Grid -->
+    <div class="quadrant quadrant-topleft">
+      <div class="dot-grid" id="dot-grid">
+        {Array.from({ length: 15 }).map((_, row) => (
+          <div class="dot-row">
+            {Array.from({ length: 13 }).map((_, col) => {
+              const icons = ["mdi:pine-tree", "mdi:arrow-right", "mdi:star"];
+              const iconName = icons[(row * 13 + col) % 3];
+              return (
+                <span class="dot-icon" data-row={row} data-col={col} tabindex="0">
+                  <Icon name={iconName} />
+                </span>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
+    <!-- Top Right: Icon Key -->
+    <div class="quadrant quadrant-topright">
+      <div class="icon-key">
+        <div><span class="icons"><Icon name="mdi:pine-tree" /></span> = nouns</div>
+        <div><span class="icons"><Icon name="mdi:arrow-right" /></span> = verbs</div>
+        <div><span class="icons"><Icon name="mdi:star" /></span> = adjectives</div>
+      </div>
+    </div>
+    <!-- Bottom Left: Shape Container -->
+    <div class="quadrant quadrant-bottomleft">
+      <div class="shape-container">
+        <!-- Shapes will be generated here -->
+      </div>
+    </div>
+    <!-- Bottom Right: Text Layer and Story -->
+    <div class="quadrant quadrant-bottomright">
+      <div class="text-layer">
+        <h1>Click on a icon to begin navigation</h1>
+      </div>
+      <p class="story">
+        <span class="highlight">Rabbit Hole</span> is a game about exploring the unknown, where each choice leads you deeper into a maze of possibilities. 
+        <br />
+        <span class="highlight">Click</span> on a shape to start your journey, and <span class="highlight">drag</span> to connect with another shape. 
+        <br />
+        Each connection opens new paths, leading you further into the rabbit hole.
+      </p>
+    </div>
+  </div>
 </body>
 
 <style>
@@ -69,11 +70,166 @@
 .icons i.mdi-star {
   color: #ffd600; /* adjective: gold/yellow */
 }
-.instructions {
+.quadrant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 100vw;
+  height: 100vh;
+  gap: 0;
+}
+.quadrant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+.quadrant-topleft {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+.quadrant-topright {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+.quadrant-bottomleft {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+.quadrant-bottomright {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+}
+.dot-grid {
+  margin-bottom: 2em;
+  font-size: 2.5rem;
+  /* Make the grid fill the quadrant */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.dot-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.3em;
+}
+.dot-icon {
+  font-size: inherit;
+  opacity: 0.9;
+}
+.icon-key {
   background: rgba(255,255,255,0.85);
   border-radius: 8px;
   padding: 1em 2em;
   box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  margin-bottom: 2em;
+  font-size: 1.1em;
+  min-width: 220px;
+}
+.icon-key .icons {
+  font-size: 1.5em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+.text-layer {
+  margin-bottom: 1em;
+}
+@media (max-width: 900px) {
+  .quadrant-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    height: auto;
+  }
+  .quadrant {
+    padding: 1rem;
+  }
 }
 </style>
+
+<script type="module">
+// --- Interactive grid connection logic ---
+const grid = document.getElementById('dot-grid');
+let isSelecting = false;
+let startDot = null;
+let line = null;
+
+function getDotCenter(dot) {
+  const rect = dot.getBoundingClientRect();
+  return {
+    x: rect.left + rect.width / 2 + window.scrollX,
+    y: rect.top + rect.height / 2 + window.scrollY
+  };
+}
+
+grid.addEventListener('click', (e) => {
+  const dot = e.target.closest('.dot-icon');
+  if (!dot) return;
+  if (!isSelecting) {
+    // First click: start selection
+    isSelecting = true;
+    startDot = dot;
+    // Create SVG line
+    if (!line) {
+      line = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      line.style.position = 'absolute';
+      line.style.left = 0;
+      line.style.top = 0;
+      line.style.width = '100vw';
+      line.style.height = '100vh';
+      line.style.pointerEvents = 'none';
+      line.style.zIndex = 10;
+      line.innerHTML = '<line x1="0" y1="0" x2="0" y2="0" stroke="black" stroke-width="3" />';
+      document.body.appendChild(line);
+    }
+    const { x, y } = getDotCenter(dot);
+    line.firstElementChild.setAttribute('x1', x);
+    line.firstElementChild.setAttribute('y1', y);
+    line.firstElementChild.setAttribute('x2', x);
+    line.firstElementChild.setAttribute('y2', y);
+    // Listen for mousemove to update line
+    document.addEventListener('mousemove', updateLine);
+  } else {
+    // Second click: end selection
+    const endDot = dot;
+    if (endDot !== startDot) {
+      const { x, y } = getDotCenter(endDot);
+      line.firstElementChild.setAttribute('x2', x);
+      line.firstElementChild.setAttribute('y2', y);
+      // Optionally: store connection, animate, etc.
+      // Instead of removing the line, keep it and allow more lines
+      if (!window.allLinesSvg) {
+        window.allLinesSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        window.allLinesSvg.style.position = 'absolute';
+        window.allLinesSvg.style.left = 0;
+        window.allLinesSvg.style.top = 0;
+        window.allLinesSvg.style.width = '100vw';
+        window.allLinesSvg.style.height = '100vh';
+        window.allLinesSvg.style.pointerEvents = 'none';
+        window.allLinesSvg.style.zIndex = 9;
+        document.body.appendChild(window.allLinesSvg);
+      }
+      // Move the finished line to the persistent SVG
+      window.allLinesSvg.appendChild(line.firstElementChild);
+      line.remove();
+      line = null;
+    } else {
+      // Remove line if clicked same dot
+      line.remove();
+      line = null;
+    }
+    isSelecting = false;
+    startDot = null;
+    document.removeEventListener('mousemove', updateLine);
+  }
+});
+
+function updateLine(e) {
+  if (!isSelecting || !line) return;
+  line.firstElementChild.setAttribute('x2', e.clientX + window.scrollX);
+  line.firstElementChild.setAttribute('y2', e.clientY + window.scrollY);
+}
+</script>
