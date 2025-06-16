@@ -6,8 +6,23 @@
         <!-- Primary Layout -->
         <!-- DOT GRID -->
         <div class="instructions">
-            <h1>hjmg</h1>
+            <h1>Rabbit Hole</h1>
             <p>Click the a shape, then drag to any second shape. Repeat</p>
+            <p>
+                <span class="icons">
+                    <i class="mdi-pine-tree"></i>    
+                </span> = nouns 
+                <br>
+                <span class="icons">
+                    <i class="mdi-play"></i>    
+                </span> = verbs 
+                <br>
+                <span class="icons">
+                    <i class="mdi-star"></i>    
+                </span> = adjectives 
+                <br>
+                Each connection opens new paths, leading you further into the rabbit hole.
+            </p>
         </div>
         <div class="game-container">
             <div class="game">
@@ -34,3 +49,31 @@
         </div>
     </div>
 </body>
+
+<style>
+.icons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 0.25em;
+  vertical-align: middle;
+}
+.icons i {
+  color: #4caf50; /* tree: green */
+  margin-right: 0.2em;
+}
+.icons i.mdi-play {
+  color: #2196f3; /* verb: blue */
+}
+.icons i.mdi-star {
+  color: #ffd600; /* adjective: gold/yellow */
+}
+.instructions {
+  background: rgba(255,255,255,0.85);
+  border-radius: 8px;
+  padding: 1em 2em;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  margin-bottom: 2em;
+}
+</style>
